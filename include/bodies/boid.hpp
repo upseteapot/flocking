@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "managers/layer_manager.hpp"
 #include "math/vec2.hpp"
+#include "bodies/cone.hpp"
 
 
 struct BoidStates
@@ -42,8 +43,6 @@ class Boid
     sf::Color m_color;
     sf::ConvexShape m_boid_shape;
     sf::CircleShape m_collision_bubble;
-    sf::CircleShape m_detection_bubble[4];
-
-    void create_collision_cone();
+    Cone m_detection_cones[4];
 };
 

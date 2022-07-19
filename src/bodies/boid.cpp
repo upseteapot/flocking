@@ -26,9 +26,8 @@ void Boid::setup(Vec2f pos, float heading, sf::Color color, LayerManager *layer_
   m_collision_bubble.setFillColor(sf::Color(m_color.r, m_color.g, m_color.b, 50));
 
   for (int i=0; i < 4; i++) {
-    m_detection_bubble[i].setRadius(m_states.range);
-    m_detection_bubble[i].setOrigin(sf::Vector2f(m_states.range, m_states.range));
-    m_detection_bubble[i].setFillColor(sf::Color(50, 120, 190, 25));
+    m_detection_cones[i].create(30, m_states.range, m_states.field_view);
+    m_detection_cones[i].set_color(sf::Color(0, 0, 0, 0), sf::Color(20, 120, 150, 50));
   }
 }
 
@@ -48,7 +47,7 @@ void Boid::apply_boid_rules(std::vector<Boid> &boids)
 
       if (check) {
         count++;
-        cohesion   += m_pos[0] + (other_pos - m_pos[i]);
+        cohesion += m_pos[0] + (other_pos - m_pos[i]);
         separation += (m_pos[i] - other_pos) / pow(distance, 3);
         allignment += boid.get_velocity();
         
@@ -76,10 +75,15 @@ void Boid::update(float dt)
   m_pos[0] += m_vel * dt;
 
   m_boid_shape.setPosition(vec2f_sfml(m_pos[0]));
-  m_collision_bubble.setPosition(vec2f_sfml(m_pos[0]));
-
-  for (int i=0; i < 4; i++)
-    m_detection_bubble[i].setPosition(vec2f_sfml(m_pos[i]));
+  
+  if (m_selected) {
+    m_collision_bubble.setPosition(vec2f_sfml(m_pos[0]));
+  
+    for (int i=0; i < 4; i++) {
+      m_detection_cones[i].set_position(m_pos[i]);
+      m_detection_cones[i].set_rotation(m_vel.angle());
+    }
+  }
 
   if (m_vel.mag() != 0)
     m_boid_shape.setRotation(rad_degrees(m_vel.angle()));
@@ -130,7 +134,7 @@ void Boid::reset_outline()
 void Boid::select()
 {
   m_selected = true;
-  m_layer_manager->add(1, m_detection_bubble);
+  m_layer_manager->add(1, m_detection_cones);
   m_layer_manager->add(1, &m_collision_bubble);
 }
     
