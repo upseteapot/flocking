@@ -1,13 +1,13 @@
-#include "bodies/cone.hpp"
+#include "shapes/section.hpp"
 
 
-Cone::~Cone()
+SectionShape::~SectionShape()
 {
   if (m_point_count != 0)
     delete[] m_points;
 }
   
-void Cone::create(unsigned int triangles, float radius, float aperture)
+void SectionShape::create(unsigned int triangles, float radius, float aperture)
 {
   m_radius = radius;
   m_aperture = aperture;
@@ -26,14 +26,14 @@ void Cone::create(unsigned int triangles, float radius, float aperture)
   }
 }
 
-void Cone::set_position(Vec2f pos) 
+void SectionShape::set_position(Vec2f pos) 
 {
   m_pos = pos;
   for (unsigned int i=0; i < m_point_count; i++)
     m_vertex_array[i].position = vec2f_sfml(m_points[i] + pos);
 }
 
-void Cone::set_rotation(float rotation)
+void SectionShape::set_rotation(float rotation)
 {
   for (unsigned int i=1; i < m_point_count; i++) {
     float angle = ((2.f * i / m_point_count) - 1.f) * m_aperture / 2.f + rotation;
@@ -42,7 +42,7 @@ void Cone::set_rotation(float rotation)
   }
 }
 
-void Cone::set_color(sf::Color from, sf::Color to)
+void SectionShape::set_color(sf::Color from, sf::Color to)
 {
   m_vertex_array[0].color = from;
   for (unsigned int i=1; i < m_point_count; i++)
@@ -50,7 +50,7 @@ void Cone::set_color(sf::Color from, sf::Color to)
 }
 
 
-void Cone::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void SectionShape::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
   target.draw(m_vertex_array, states);
 }

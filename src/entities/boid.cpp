@@ -1,4 +1,4 @@
-#include "bodies/boid.hpp"
+#include "entities/boid.hpp"
 
 
 void Boid::setup(Vec2f pos, float heading, sf::Color color, LayerManager *layer_manager, BoidStates states) 
@@ -24,11 +24,8 @@ void Boid::setup(Vec2f pos, float heading, sf::Color color, LayerManager *layer_
   m_collision_bubble.setRadius(m_states.radius);
   m_collision_bubble.setOrigin(sf::Vector2f(m_states.radius, m_states.radius));
   m_collision_bubble.setFillColor(sf::Color(m_color.r, m_color.g, m_color.b, 50));
-
-  for (int i=0; i < 4; i++) {
-    m_detection_cones[i].create(30, m_states.range, m_states.field_view);
-    m_detection_cones[i].set_color(sf::Color(0, 0, 0, 0), sf::Color(20, 120, 150, 50));
-  }
+  
+  m_detection_cones.setup(m_states.range, m_states.field_view, m_pos, &m_vel);
 }
 
 void Boid::apply_boid_rules(std::vector<Boid> &boids)
@@ -37,6 +34,8 @@ void Boid::apply_boid_rules(std::vector<Boid> &boids)
   Vec2f rel_pos, cohesion, separation, allignment;
 
   for (auto &boid : boids) {
+    if (m_selected)
+      boid.reset_outline();  
     Vec2f other_pos = boid.get_position();
     
     for (int i=0; i < 4; i++) {
@@ -53,15 +52,12 @@ void Boid::apply_boid_rules(std::vector<Boid> &boids)
         
         if (m_selected)
           boid.set_outline(sf::Color(255, 190, 0));
-      } 
-      
-      else if (m_selected)
-        boid.reset_outline();  
+      }   
     }
   }
 
   if (count > 0) {
-    cohesion   = Vec2f::set_mag((cohesion / count) - m_pos[0], m_states.max_vel) - m_vel;
+    cohesion = Vec2f::set_mag((cohesion / count) - m_pos[0], m_states.max_vel) - m_vel;
     separation = Vec2f::set_mag((separation / count), m_states.max_vel) - m_vel;
     allignment = Vec2f::set_mag(allignment / count, m_states.max_vel) - m_vel;
     m_vel += (cohesion * m_states.tune_c + separation * m_states.tune_s + allignment * m_states.tune_a) * m_states.tune; 
@@ -78,11 +74,7 @@ void Boid::update(float dt)
   
   if (m_selected) {
     m_collision_bubble.setPosition(vec2f_sfml(m_pos[0]));
-  
-    for (int i=0; i < 4; i++) {
-      m_detection_cones[i].set_position(m_pos[i]);
-      m_detection_cones[i].set_rotation(m_vel.angle());
-    }
+    m_detection_cones.update(); 
   }
 
   if (m_vel.mag() != 0)
@@ -134,7 +126,7 @@ void Boid::reset_outline()
 void Boid::select()
 {
   m_selected = true;
-  m_layer_manager->add(1, m_detection_cones);
+  m_layer_manager->add(1, &m_detection_cones);
   m_layer_manager->add(1, &m_collision_bubble);
 }
     

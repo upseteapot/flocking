@@ -4,8 +4,8 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "graphics/engine.hpp"
-#include "bodies/boid.hpp"
-#include "managers/layer_manager.hpp"
+#include "graphics/layer_manager.hpp"
+#include "entities/boid.hpp"
 #include "math/vec2.hpp"
 
 #define map(x, x1, x2, y1, y2) (((x - x1) / (x2 -  x1)) * (y2 - y1)) + y1  

@@ -4,11 +4,11 @@
 #include "math/vec2.hpp"
 
 
-class Cone : public sf::Drawable
+class SectionShape : public sf::Drawable
 {
   public:
-    Cone() = default;
-    ~Cone();
+    SectionShape() = default;
+    ~SectionShape();
     void create(unsigned int triangles, float radius, float aperture);
     void set_position(Vec2f pos);
     void set_rotation(float rotation);
