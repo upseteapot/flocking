@@ -1,4 +1,5 @@
 #include "entities/boid.hpp"
+#include <iostream>
 
 
 void Boid::setup(Vec2f pos, float heading, sf::Color color, LayerManager *layer_manager, BoidStates states) 
@@ -19,13 +20,15 @@ void Boid::setup(Vec2f pos, float heading, sf::Color color, LayerManager *layer_
   m_boid_shape.setOutlineThickness(-1);
   m_boid_shape.setOutlineColor(color); 
   m_boid_shape.setFillColor(sf::Color(0, 0, 0, 0));
+  m_boid_shape.setPosition(vec2f_sfml(m_pos[0]));
+  m_boid_shape.setRotation(rad_degrees(m_vel.angle()));
   m_layer_manager->add(0, &m_boid_shape);
   
   m_collision_bubble.setRadius(m_states.radius);
   m_collision_bubble.setOrigin(sf::Vector2f(m_states.radius, m_states.radius));
   m_collision_bubble.setFillColor(sf::Color(m_color.r, m_color.g, m_color.b, 50));
   
-  m_detection_cones.setup(m_states.range, m_states.field_view, m_pos, &m_vel);
+  m_detection_zones.setup(m_states.range, m_states.field_view, m_pos, &m_vel);
 }
 
 void Boid::apply_boid_rules(std::vector<Boid> &boids)
@@ -70,28 +73,28 @@ void Boid::update(float dt)
 {
   m_pos[0] += m_vel * dt;
 
-  m_boid_shape.setPosition(vec2f_sfml(m_pos[0]));
-  
-  if (m_selected) {
-    m_collision_bubble.setPosition(vec2f_sfml(m_pos[0]));
-    m_detection_cones.update(); 
-  }
+  m_boid_shape.setPosition(vec2f_sfml(m_pos[0])); 
+  m_collision_bubble.setPosition(vec2f_sfml(m_pos[0]));
+  m_detection_zones.update(); 
 
   if (m_vel.mag() != 0)
     m_boid_shape.setRotation(rad_degrees(m_vel.angle()));
 }
 
-void Boid::bounds(int width, int height)
+void Boid::bounds(int window_width, int window_height)
 {
-  if (m_pos[0].x < -width / 2.f - 1 - m_states.radius)
-    m_pos[0].x = width / 2.f + m_states.radius - 1;
-  else if (m_pos[0].x > width / 2.f + 1 + m_states.radius)
-    m_pos[0].x = -width / 2.f - m_states.radius + 1;
+  int width  = window_width  + 2.f * m_states.radius;
+  int height = window_height + 2.f * m_states.radius;
 
-  if (m_pos[0].y < -height / 2.f - 1 - m_states.radius)
-    m_pos[0].y = height / 2.f + m_states.radius - 1;
-  else if (m_pos[0].y > height / 2.f + 1 + m_states.radius)
-    m_pos[0].y = -height / 2.f - m_states.radius + 1;
+  if (m_pos[0].x < -width / 2.f)
+    m_pos[0].x = m_pos[1].x;
+  else if (m_pos[0].x > width / 2.f)
+    m_pos[0].x = m_pos[1].x;
+
+  if (m_pos[0].y < -height / 2.f)
+    m_pos[0].y = m_pos[1].y;
+  else if (m_pos[0].y > height / 2.f)
+    m_pos[0].y = m_pos[1].y;
 
   for (int i=1; i < 4; i++)
     m_pos[i] = m_pos[0];
@@ -110,7 +113,7 @@ void Boid::bounds(int width, int height)
   } else if (m_pos[0].y > height / 2.f - m_states.range) {
     m_pos[1].y = -height + m_pos[0].y;
     m_pos[3].y = -height + m_pos[0].y;
-  }
+  }  
 }
 
 void Boid::set_outline(sf::Color outline_color)
@@ -126,7 +129,7 @@ void Boid::reset_outline()
 void Boid::select()
 {
   m_selected = true;
-  m_layer_manager->add(1, &m_detection_cones);
+  m_layer_manager->add(1, &m_detection_zones);
   m_layer_manager->add(1, &m_collision_bubble);
 }
     

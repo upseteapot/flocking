@@ -28,30 +28,31 @@ void Simulation::setup()
     default_states.tune_a     += map((float)rand() / RAND_MAX, 0.0f, 1.0f, -0.03f, 0.03f);
 
     m_boids[i].setup(pos, heading, sf::Color(r, g, b), &m_layer_manager, default_states);
+    m_boids[i].bounds(m_size.x, m_size.y);
   }
 }
 
 void Simulation::run(float dt)
 {
-  m_renderer.clear(sf::Color::Black);
-  
-  for (auto &boid : m_boids) {
-    boid.bounds(m_size.x, m_size.y);
-    boid.apply_boid_rules(m_boids);
-    boid.update(dt);
+  if (!m_paused) {
+    for (auto &boid : m_boids) {
+      boid.apply_boid_rules(m_boids);
+      boid.update(dt);
+      boid.bounds(m_size.x, m_size.y);
+    }
   }
 
+  m_renderer.clear(sf::Color::Black);
   m_renderer.draw(m_layer_manager);
-
   m_renderer.display();
 }
 
 void Simulation::event()
 {
   switch (m_event.type) {
-    
+
     case sf::Event::MouseButtonPressed:
-      if (m_event.mouseButton.button == sf::Mouse::Left) {
+      if (m_event.mouseButton.button == sf::Mouse::Left && !m_paused) {
         if (m_has_selected) {
           m_boids[m_selected_index].deselect();
           for (auto &boid : m_boids)
@@ -67,6 +68,11 @@ void Simulation::event()
             break;
           }
       }
+      break;
+
+    case sf::Event::KeyPressed:
+      if (m_event.key.code == sf::Keyboard::Space)
+        m_paused = !m_paused;
       break;
 
     default:

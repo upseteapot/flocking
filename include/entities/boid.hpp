@@ -43,6 +43,6 @@ class Boid
     sf::Color m_color;
     sf::ConvexShape m_boid_shape;
     sf::CircleShape m_collision_bubble;
-    BoidViews m_detection_cones;
+    BoidViews m_detection_zones;
 };
 

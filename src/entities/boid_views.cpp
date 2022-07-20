@@ -24,9 +24,8 @@ void BoidViews::update()
 
 void BoidViews::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-  target.draw(m_shape[0], states);
   int j;
-  for (int i=1; i < 4; i++) {
+  for (int i=0; i < 4; i++) {
     for (j=0; j < i; j++)
       if (m_pos[i] == m_pos[j])
         break;

@@ -17,8 +17,9 @@ class Simulation : public Engine
     Simulation() = default;
 
   private:
-    const int m_boids_size = 220;
+    bool m_paused = true;
     bool m_has_selected = false;
+    const int m_boids_size = 220;
     std::size_t m_selected_index = -1;
     std::vector<Boid> m_boids;
     
